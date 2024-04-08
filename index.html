@@ -3,24 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KML-Route in Leaflet-Karte</title>
+<title>Ferienblog</title>
 <!-- Einbindung von Leaflet.js -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<!-- CSS für die Karte -->
 <style>
     #map {
         height: 600px;
     }
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    h1 {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 36px;
+        color: #333;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    #blog-posts {
+        padding: 20px;
+    }
+    .blog-post {
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        padding: 10px;
+    }
+    .blog-img {
+        display: block;
+        margin: 0 auto 10px;
+        max-width: 100%;
+        height: auto;
+    }
+    .post-text {
+        text-align: center;
+        color: #555;
+    }
+    .post-title {
+        text-align: center;
+        font-size: 24px;
+        color: #666;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+    .post-title::after {
+        content: "";
+        display: block;
+        width: 60px;
+        height: 3px;
+        background-color: #999;
+        margin: 10px auto;
+    }
+    .double-img {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    .double-img img {
+        width: 100%; /* Auf Smartphones sollten die Bilder gestapelt werden */
+    }
+    
+    /* Media Query für Laptops und größere Bildschirme */
+    @media (min-width: 768px) {
+        .double-img img {
+            width: 48%; /* Auf größeren Bildschirmen nebeneinander anzeigen */
+        }
+    }
 </style>
 </head>
 <body>
-<h1>KML-Route in Leaflet-Karte</h1>
-<div id="map"></div>
+<h1>Ferienblog</h1>
+
+<div id="blog-posts">
+    <!-- Beispiel für einen Post -->
+    <div class="blog-post">
+        <h2 class="post-title">Post 1</h2>
+        <div class="double-img">
+            <img src="bild1.jpg" class="blog-img">
+            <img src="bild2.jpg" class="blog-img">
+        </div>
+        <div id="map"></div>
+        <p class="post-text">Dies ist ein Beispieltext für Post 1.</p>
+    </div>
+
+    <!-- Beispiel für einen weiteren Post -->
+    <div class="blog-post">
+        <h2 class="post-title">Post 2</h2>
+        <img src="bild3.jpg" class="blog-img" style="max-width: 600px;">
+        <img src="Bild1.jpg" class="blog-img" style="max-width: 600px;">
+        <img src="bild2.jpg" class="blog-img" style="width: 100%;">
+        <p class="post-text">Hier steht der Text für Post 2.</p>
+    </div>
+</div>
 
 <script>
 // Initialisiere die Karte
-var map = L.map('map').setView([59.4116, 5.2783], 8); // Zentriere die Karte auf dem ersten Punkt mit Zoomstufe 8
+var map = L.map('map').setView([59.92, 5.42], 8); // Zentriere die Karte auf dem ersten Punkt mit Zoomstufe 8
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
@@ -52,6 +133,27 @@ fetch('Route.kml')
         var polyline = L.polyline(polylinePoints, {color: 'blue'}).addTo(map);
     })
     .catch(error => console.error('Error loading KML file:', error));
+
+// Satellitenbildkarte hinzufügen
+var satelliteLayer = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/satellite-v9',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'YOUR_MAPBOX_ACCESS_TOKEN'
+});
+
+// Tile-Layer-Control hinzufügen, um zwischen Basiskarte und Satellitenbildkarte zu wechseln
+var baseMaps = {
+    "OpenStreetMap": osmLayer,
+    "Satellitenbild": satelliteLayer
+};
+L.control.layers(baseMaps).addTo(map);
+
+// Füge die Satellitenbildkarte als Standardkarte hinzu
+satelliteLayer.addTo(map);
 </script>
+
 </body>
 </html>
