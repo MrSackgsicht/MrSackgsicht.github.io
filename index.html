@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KML-Route in Leaflet-Karte</title>
+<!-- Einbindung von Leaflet.js -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- CSS für die Karte -->
+<style>
+    #map {
+        height: 600px;
+    }
+</style>
+</head>
+<body>
+<h1>KML-Route in Leaflet-Karte</h1>
+<div id="map"></div>
+
+<script>
+// Initialisiere die Karte
+var map = L.map('map').setView([59.4116, 5.2783], 8); // Zentriere die Karte auf dem ersten Punkt mit Zoomstufe 8
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// Laden der KML-Datei und Einbetten der Linie in die Karte
+fetch('Route.kml')
+    .then(response => response.text())
+    .then(kmlData => {
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(kmlData, 'text/xml');
+        var coordinates = [];
+
+        // Extrahiere Koordinaten aus der KML-Datei
+        var coordElements = xmlDoc.querySelectorAll('coordinates');
+        coordElements.forEach(function(coordElement) {
+            var coordStrings = coordElement.textContent.trim().split(/\s+/);
+            coordStrings.forEach(function(coordString) {
+                var parts = coordString.split(',');
+                coordinates.push([parseFloat(parts[1]), parseFloat(parts[0])]); // Beachte die Reihenfolge: Breitengrad, Längengrad
+            });
+        });
+
+        // Konvertiere KML-Punkte in Leaflet-Linienpunkte
+        var polylinePoints = coordinates.map(function(point) {
+            return L.latLng(point[0], point[1]);
+        });
+
+        // Zeichne die Linie auf der Karte
+        var polyline = L.polyline(polylinePoints, {color: 'blue'}).addTo(map);
+    })
+    .catch(error => console.error('Error loading KML file:', error));
+</script>
+</body>
+</html>
